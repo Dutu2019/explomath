@@ -2,7 +2,7 @@ import soundfile as sf
 import numpy as np
 import matplotlib.pyplot as plt
 
-sec_to_read = 0.5
+sec_to_read = 0.2
 sr = 44_100
 T = 1.0 / sr
 first_channel, _ = sf.read("250.wav", int(sec_to_read * sr))
