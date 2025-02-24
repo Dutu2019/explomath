@@ -2,10 +2,10 @@ import soundfile as sf
 import numpy as np
 import matplotlib.pyplot as plt
 
-sec_to_read = 0.2
+sec_to_read = 3.0
 sr = 44_100
 T = 1.0 / sr
-first_channel, _ = sf.read("250.wav", int(sec_to_read * sr))
+first_channel, sr = sf.read("chord.wav", int(sec_to_read * sr))
 
 # first_channel = data[:,0]
 time = np.linspace(0, len(first_channel) / sr, num=len(first_channel))
@@ -33,8 +33,16 @@ positive_freqs = fft_freq[positive_indices]
 positive_magnitude = magnitude[positive_indices]
 
 top_indices = np.argsort(positive_magnitude)[::-1]
-for i in top_indices[:5]:
-    print(f"Freq: {fft_freq[i]}\n")
+freq_set = {0}
+freq_to_print = 6
+i = 0
+while freq_to_print>0:
+    minimum = min(list(map(lambda visited_freq: (fft_freq[top_indices[i]]-visited_freq)**2, freq_set)))
+    if minimum>50:
+        print(f"Freq: {fft_freq[top_indices[i]]}\n")
+        freq_set.add(fft_freq[top_indices[i]])
+        freq_to_print -= 1
+    i += 1
 
 # Plot the original signal
 plt.subplot(2, 1, 1)
@@ -45,7 +53,7 @@ plt.ylabel("Amplitude")
 
 # Plot the magnitude spectrum
 plt.subplot(2, 1, 2)
-plt.stem(fft_freq[:len(first_channel)//8], magnitude[:len(first_channel)//8], basefmt=" ")
+plt.stem(fft_freq[:len(first_channel)//32], magnitude[:len(first_channel)//32], basefmt=" ")
 plt.title("Magnitude Spectrum")
 plt.xlabel("Frequency (Hz)")
 plt.ylabel("Magnitude")
