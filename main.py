@@ -36,27 +36,29 @@ def ask_file_upload():
     if not file: exit()
     return file.name
 
-file_path = "chord.wav"
+file_path = ask_file_upload()
 
 # Variables for calculating FFT
-sec_to_read = 3.0
+sec_to_read = 0.1
 sr = sf.info(file_path).samplerate
-T = 1.0 / sr
+dT = 1.0 / sr
 data, sr = sf.read(file_path, int(sec_to_read * sr), always_2d=True)
-first_channel = data[:,0]
+signal = data[:,0]
 
 # Making the fft graph
-fft_values = np.fft.fft(first_channel, len(first_channel))
-fft_freq = np.fft.fftfreq(len(first_channel), d=T)
-magnitude = np.abs(fft_values)
+fft_freq = np.fft.fftfreq(len(signal), d=dT)
+fft_values = np.abs(np.fft.fft(signal))
 
 # Remove negative frequencies
 positive_indices = np.where(fft_freq >= 0)
-positive_freqs = fft_freq[positive_indices]
-positive_magnitude = magnitude[positive_indices]
+fft_freq = fft_freq[positive_indices]
+fft_values = fft_values[positive_indices]
+
+# Normalising magnitude [0, 1]
+top_indices = np.argsort(fft_values)[::-1]
+magnitude = np.abs(fft_values/fft_values[top_indices[0]])
 
 # Frequency filter function 
-top_indices = np.argsort(positive_magnitude)[::-1]
 freq_set = {0}
 freq_to_print = 6
 i = 0
@@ -69,18 +71,18 @@ while freq_to_print>0:
     i += 1
 
 # Plotting the graphs
-time = np.linspace(0, len(first_channel) / sr, num=len(first_channel))
+time = np.linspace(0, len(signal) / sr, num=len(signal))
 
 # Plot the original signal
 plt.subplot(2, 1, 1)
-plt.plot(time, first_channel)
+plt.plot(time, signal)
 plt.title("Time Domain")
 plt.xlabel("Time (s)")
 plt.ylabel("Amplitude")
 
 # Plot the magnitude spectrum
 plt.subplot(2, 1, 2)
-plt.stem(fft_freq[:len(first_channel)//32], magnitude[:len(first_channel)//32], basefmt=" ")
+plt.stem(fft_freq[:len(signal)//32], magnitude[:len(signal)//32], basefmt=" ")
 plt.title("Frequency Domain")
 plt.xlabel("Frequency (Hz)")
 plt.ylabel("Magnitude")
