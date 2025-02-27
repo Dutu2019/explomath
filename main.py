@@ -4,6 +4,8 @@ import matplotlib.pyplot as plt
 import tkinter as tk
 from tkinter import filedialog
 
+import piano.pythonpiano
+
 # Creating freq:notes dictionnary
 notes = ['C', 'C#', 'D', 'D#', 'E', 'F', 
          'F#', 'G', 'G#', 'A', 'A#', 'B']
@@ -65,7 +67,7 @@ mask = np.concatenate(([True], diffs > 2.0))
 filtered_present_freqs = present_freqs[mask]
 for key in frequency_to_note:
     for present_freq in filtered_present_freqs:
-        if key-10 <= present_freq <= key+10:
+        if key-5 <= present_freq <= key+5:
             print(key, frequency_to_note[key])
 
 
