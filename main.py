@@ -39,7 +39,7 @@ def ask_file_upload():
 file_path = ask_file_upload()
 
 # Variables for calculating FFT
-sec_to_read = 0.1
+sec_to_read = 3.0
 sr = sf.info(file_path).samplerate
 dT = 1.0 / sr
 data, sr = sf.read(file_path, int(sec_to_read * sr), always_2d=True)
@@ -59,16 +59,15 @@ top_indices = np.argsort(fft_values)[::-1]
 magnitude = np.abs(fft_values/fft_values[top_indices[0]])
 
 # Frequency filter function 
-freq_set = {0}
-freq_to_print = 6
-i = 0
-while freq_to_print>0:
-    minimum = min(list(map(lambda visited_freq: (fft_freq[top_indices[i]]-visited_freq)**2, freq_set)))
-    if minimum>50:
-        print(f"Freq: {fft_freq[top_indices[i]]}\n")
-        freq_set.add(fft_freq[top_indices[i]])
-        freq_to_print -= 1
-    i += 1
+present_freqs = fft_freq[np.where(magnitude>=0.3)]
+diffs = np.diff(present_freqs)
+mask = np.concatenate(([True], diffs > 2.0))
+filtered_present_freqs = present_freqs[mask]
+for key in frequency_to_note:
+    for present_freq in filtered_present_freqs:
+        if key-10 <= present_freq <= key+10:
+            print(key, frequency_to_note[key])
+
 
 # Plotting the graphs
 time = np.linspace(0, len(signal) / sr, num=len(signal))
