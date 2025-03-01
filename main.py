@@ -61,13 +61,12 @@ fft_values = np.abs(fft_values/fft_values[top_indices[0]])
 present_notes = ""
 present_freqs = fft_freq[np.where(fft_values>=0.3)]
 diffs = np.diff(present_freqs)
-mask = np.concatenate(([True], diffs > 2.0))
+mask = np.concatenate(([True], diffs > 5.0))
 filtered_present_freqs = present_freqs[mask]
 for key in frequency_to_note:
     for present_freq in filtered_present_freqs:
         if key-5 <= present_freq <= key+5:
-            if not f"{frequency_to_note[key]} ({key}Hz)\n" in present_notes:
-                present_notes += f"{frequency_to_note[key]} ({key}Hz)\n"
+            present_notes += f"{frequency_to_note[key]} ({key}Hz)\n"
 
 # Plot the original signal
 plt.subplot(2, 1, 1)
