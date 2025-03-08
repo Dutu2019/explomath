@@ -3,6 +3,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 import tkinter as tk
 from tkinter import filedialog
+from gui import *
+from threading import Thread
 
 # Create the dictionary mapping note names to frequencies
 notes = ['C', 'C#', 'D', 'D#', 'E', 'F', 
@@ -58,7 +60,7 @@ top_indices = np.argsort(fft_values)[::-1]
 fft_values = np.abs(fft_values/fft_values[top_indices[0]])
 
 # Get top frequencies and search their corresponding note
-present_notes = ""
+present_notes = []
 present_freqs = fft_freq[np.where(fft_values>=0.3)]
 diffs = np.diff(present_freqs)
 mask = np.concatenate(([True], diffs > 5.0))
@@ -66,7 +68,12 @@ filtered_present_freqs = present_freqs[mask]
 for key in frequency_to_note:
     for present_freq in filtered_present_freqs:
         if key-5 <= present_freq <= key+5:
-            present_notes += f"{frequency_to_note[key]} ({key}Hz)\n"
+            present_notes.append(frequency_to_note[key])
+
+# GUI
+activate_tiles(present_notes)
+GUI_Thread = Thread(target=run_gui)
+GUI_Thread.start()
 
 # Plot the original signal
 plt.subplot(2, 1, 1)
@@ -81,7 +88,5 @@ plt.stem(fft_freq[:len(signal)//32], fft_values[:len(signal)//32], basefmt=" ")
 plt.title("Frequency Domain")
 plt.xlabel("Frequency (Hz)")
 plt.ylabel("Magnitude")
-plt.text(0.7, 0.2, present_notes)
-
 plt.tight_layout()
 plt.show()
